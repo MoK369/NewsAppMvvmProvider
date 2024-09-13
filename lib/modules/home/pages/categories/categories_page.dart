@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:news/core/models/category_model.dart';
 import 'package:news/core/providers/locales/locales_provider.dart';
 import 'package:news/modules/home/pages/categories/views/all_category_view.dart';
-import 'package:news/modules/home/pages/categories/views/in_specific_category.dart';
+import 'package:news/modules/home/pages/categories/views/in_specific_category_view.dart';
 import 'package:provider/provider.dart';
 
 class CategoriesPage extends StatefulWidget {

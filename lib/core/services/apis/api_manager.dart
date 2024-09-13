@@ -14,7 +14,7 @@ class Endpoints {
 class ApiManager {
   static const String baseUrl = "newsapi.org";
 
-  static Future<NewsModel> getNewsByQuery(String query) async {
+  static Future<NewsModel?> getNewsByQuery(String query) async {
     Uri url = Uri.https(baseUrl, Endpoints.everyThing, {"q": query});
     http.Response response =
         await http.get(url, headers: {"X-Api-Key": dotenv.env["API_KEY"]!});

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:news/core/api_errors/api_errors.dart';
-import 'package:news/core/models/news_model.dart';
 import 'package:news/core/providers/locales/locales_provider.dart';
 import 'package:news/core/providers/themes/themes_provider.dart';
-import 'package:news/core/services/apis/api_manager.dart';
 import 'package:news/core/themes/app_themes.dart';
 import 'package:news/core/widgets/articles_List_view/articles_list_view.dart';
 import 'package:news/core/widgets/background_pattern/background_pattern.dart';
+import 'package:news/modules/search/view_models/everything_articles_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -20,115 +18,103 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController textEditingController = TextEditingController();
-  bool isSearchClicked = false, articlesBuildOnce = false;
-  NewsModel? newsModel;
+  bool isSearchClicked = false;
   late ThemesProvider themesProvider;
+  EverythingArticlesViewModel everythingArticlesViewModel =
+      EverythingArticlesViewModel();
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     final ThemeData theme = Theme.of(context);
     themesProvider = Provider.of(context);
-    debugPrint("articles Statues: $articlesBuildOnce");
-    return GestureDetector(
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            leading: const SizedBox(),
-            leadingWidth: 0,
-            toolbarHeight: size.height * 0.08,
-            title: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: TextField(
-                controller: textEditingController,
-                style: theme.textTheme.labelMedium,
-                onSubmitted: (value) {
-                  onSearchButtonClick();
-                },
-                decoration: InputDecoration(
-                  hintText: LocalesProvider.getTrans(context).searchArticle,
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        onSearchButtonClick();
-                      },
-                      icon: Icon(
-                        Icons.search,
-                        size: 30,
-                        color: getIconColor(),
-                      )),
-                  prefixIcon: IconButton(
-                      onPressed: () {
-                        onClearButtonClick();
-                      },
-                      icon: Icon(
-                        Icons.clear,
-                        size: 30,
-                        color: getIconColor(),
-                      )),
+    return ChangeNotifierProvider(
+        create: (context) => everythingArticlesViewModel,
+        child: GestureDetector(
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                leading: const SizedBox(),
+                leadingWidth: 0,
+                toolbarHeight: size.height * 0.08,
+                title: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: TextField(
+                    controller: textEditingController,
+                    style: theme.textTheme.labelMedium,
+                    onSubmitted: (value) {
+                      onSearchButtonClick();
+                    },
+                    decoration: InputDecoration(
+                      hintText: LocalesProvider.getTrans(context).searchArticle,
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            onSearchButtonClick();
+                          },
+                          icon: Icon(
+                            Icons.search,
+                            size: 30,
+                            color: getIconColor(),
+                          )),
+                      prefixIcon: IconButton(
+                          onPressed: () {
+                            onClearButtonClick();
+                          },
+                          icon: Icon(
+                            Icons.clear,
+                            size: 30,
+                            color: getIconColor(),
+                          )),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          body: !articlesBuildOnce
-              ? BgPattern(
+              body: BgPattern(
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Visibility(
-                      visible: !isSearchClicked,
-                      child: Expanded(
-                        child: Center(
-                            child: ImageIcon(
-                          const AssetImage(
-                              "assets/icons/window_search_icon.png"),
-                          size: 80,
-                          color: getIconColor(),
-                        )),
-                      ),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Visibility(
+                    visible: !isSearchClicked,
+                    child: Expanded(
+                      child: Center(
+                          child: ImageIcon(
+                        const AssetImage("assets/icons/window_search_icon.png"),
+                        size: 80,
+                        color: getIconColor(),
+                      )),
                     ),
-                    Visibility(
-                      visible: isSearchClicked,
-                      child: Expanded(
-                        child: FutureBuilder(
-                          future: ApiManager.getNewsByQuery(
-                              textEditingController.text),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              String message =
-                                  ApiErrors.checkApiError(snapshot.error!);
-                              return Center(child: Text(message));
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else {
-                              if (snapshot.data?.code != null) {
-                                return Center(
-                                    child: Text(
-                                        textAlign: TextAlign.center,
-                                        "${snapshot.data!.code}\n${snapshot.data!.message}"));
-                              }
-                              newsModel = snapshot.data;
-                              articlesBuildOnce = true;
-                              return ArticlesListView(
-                                  newsModel: newsModel,
-                                  showClearAllResults: true,
-                                  onClearResultsClick: onClearResultsClick);
-                            }
-                          },
-                        ),
-                      ),
-                    )
-                  ],
-                ))
-              : ArticlesListView(
-                  newsModel: newsModel,
-                  showClearAllResults: true,
-                  onClearResultsClick: onClearResultsClick)),
-    );
+                  ),
+                  Visibility(
+                    visible: isSearchClicked,
+                    child:
+                        Expanded(child: Consumer<EverythingArticlesViewModel>(
+                      builder: (context, everythingArticlesViewModel, child) {
+                        if (everythingArticlesViewModel.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (everythingArticlesViewModel.errorMessage !=
+                            null) {
+                          return Center(
+                              child: Text(
+                                  everythingArticlesViewModel.errorMessage ??
+                                      ""));
+                        } else {
+                          return ArticlesListView(
+                              newsModel: everythingArticlesViewModel.newsModel,
+                              showClearAllResults: true,
+                              onClearResultsClick: onClearResultsClick);
+                        }
+                      },
+                    )),
+                  )
+                ],
+              ))),
+        ));
   }
 
   void onSearchButtonClick() {
@@ -137,8 +123,8 @@ class _SearchScreenState extends State<SearchScreen> {
           content: Text(LocalesProvider.getTrans(context).searchFieldEmpty)));
     } else {
       setState(() {
+        everythingArticlesViewModel.getNewsByQuery(textEditingController.text);
         isSearchClicked = true;
-        articlesBuildOnce = false;
         FocusManager.instance.primaryFocus?.unfocus();
       });
     }
@@ -147,7 +133,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void onClearButtonClick() {
     if (textEditingController.text.isNotEmpty) {
       textEditingController.clear();
-      //articlesBuildOnce = false;
     } else {
       FocusManager.instance.primaryFocus?.unfocus();
       Navigator.pop(context);
@@ -156,9 +141,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void onClearResultsClick() {
     setState(() {
-      newsModel = null;
+      everythingArticlesViewModel.newsModel = null;
       textEditingController.clear();
-      articlesBuildOnce = false;
       isSearchClicked = false;
     });
   }
