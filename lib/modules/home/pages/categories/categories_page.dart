@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:news/core/models/category_model.dart';
 import 'package:news/core/providers/locales/locales_provider.dart';
-import 'package:news/modules/home/pages/categories/views/all_category_view.dart';
-import 'package:news/modules/home/pages/categories/views/in_specific_category_view.dart';
+import 'package:news/modules/home/pages/categories/views/all_categories/all_categories_view.dart';
+import 'package:news/modules/home/pages/categories/views/in_specific_catagory/in_specific_category_view.dart';
 import 'package:provider/provider.dart';
 
 class CategoriesPage extends StatefulWidget {
@@ -47,7 +47,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           id: 'business',
           label: LocalesProvider.getTrans(context).business,
           bgColor: const Color(0xFFCF7E48),
-          imagePath: "assets/images/bussines.png"),
+          imagePath: "assets/images/business.png"),
       CategoryModel(
           id: "general",
           label: LocalesProvider.getTrans(context).general,
@@ -71,7 +71,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return widget.currentCategoryId == null
-        ? AllCategoryView(
+        ? AllCategoriesView(
             onCategoryCardTap: (categoryId, categoryLabel) {
               widget.onTap(categoryId, categoryLabel);
             },

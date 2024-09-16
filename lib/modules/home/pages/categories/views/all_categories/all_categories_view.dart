@@ -4,11 +4,11 @@ import 'package:news/modules/home/pages/categories/categories_page.dart';
 import 'package:news/modules/home/pages/categories/widgets/category_card.dart';
 import 'package:provider/provider.dart';
 
-class AllCategoryView extends StatelessWidget {
+class AllCategoriesView extends StatelessWidget {
   final void Function(String categoryId, String categoryLabel)
       onCategoryCardTap;
 
-  const AllCategoryView({super.key, required this.onCategoryCardTap});
+  const AllCategoriesView({super.key, required this.onCategoryCardTap});
 
   @override
   Widget build(BuildContext context) {

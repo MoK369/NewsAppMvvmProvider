@@ -1,31 +1,26 @@
-import 'package:flutter/material.dart';
+import 'package:news/core/bases/base_view_model/base_view_model.dart';
+import 'package:news/core/bases/base_view_state/base_view_state.dart';
 import 'package:news/core/models/sources_model.dart';
 import 'package:news/core/services/apis/api_manager.dart';
+import 'package:news/core/services/apis/api_result.dart';
 
-class CategorySourcesViewModel extends ChangeNotifier {
-  List<Source>? sources;
-  String? errorMessage;
-  bool isLoading = false;
+class CategorySourcesViewModel extends BaseViewModel<List<Source>> {
+  CategorySourcesViewModel() : super(viewState: LoadingState());
 
   Future<void> getSourcesByCategoryId(String categoryId) async {
-    try {
-      isLoading = true;
-      notifyListeners();
-      var sourcesModel = await ApiManager.getSourcesByCategoryId(categoryId);
-      isLoading = false;
-      if (sourcesModel?.status == "ok") {
-        // Result:
-        sources = sourcesModel?.sources ?? [];
-      } else {
-        // error
-        errorMessage = sourcesModel?.message ?? "";
-      }
-      notifyListeners();
-    } catch (e) {
-      // show exception error
-      isLoading = false;
-      errorMessage = e.toString();
-      notifyListeners();
+    refreshWithState(LoadingState());
+    ApiResult<List<Source>> apiResult =
+        await ApiManager.getSourcesByCategoryId(categoryId);
+    switch (apiResult) {
+      case Success():
+        refreshWithState(SuccessState(data: apiResult.data));
+        break;
+      case ServerError():
+        refreshWithState(ErrorState(serverError: apiResult));
+        break;
+      case CodeError():
+        refreshWithState(ErrorState(codeError: apiResult));
+        break;
     }
   }
 }

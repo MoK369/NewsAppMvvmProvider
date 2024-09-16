@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:news/core/api_error_message/api_error_message.dart';
+import 'package:news/core/bases/base_view_state/base_view_state.dart';
+import 'package:news/core/models/news_model.dart';
 import 'package:news/core/providers/locales/locales_provider.dart';
 import 'package:news/core/providers/themes/themes_provider.dart';
 import 'package:news/core/themes/app_themes.dart';
@@ -93,21 +96,22 @@ class _SearchScreenState extends State<SearchScreen> {
                     child:
                         Expanded(child: Consumer<EverythingArticlesViewModel>(
                       builder: (context, everythingArticlesViewModel, child) {
-                        if (everythingArticlesViewModel.isLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (everythingArticlesViewModel.errorMessage !=
-                            null) {
-                          return Center(
-                              child: Text(
-                                  everythingArticlesViewModel.errorMessage ??
-                                      ""));
-                        } else {
-                          return ArticlesListView(
-                              newsModel: everythingArticlesViewModel.newsModel,
-                              showClearAllResults: true,
-                              onClearResultsClick: onClearResultsClick);
+                        var state = everythingArticlesViewModel.viewState;
+                        switch (state) {
+                          case LoadingState<NewsModel>():
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          case ErrorState<NewsModel>():
+                            return Center(
+                                child: Text(ApiErrorMessage.getErrorMessage(
+                                    serverError: state.serverError,
+                                    codeError: state.codeError)));
+                          case SuccessState<NewsModel>():
+                            return ArticlesListView(
+                                newsModel: state.data,
+                                showClearAllResults: true,
+                                onClearResultsClick: onClearResultsClick);
                         }
                       },
                     )),
@@ -141,7 +145,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void onClearResultsClick() {
     setState(() {
-      everythingArticlesViewModel.newsModel = null;
+      everythingArticlesViewModel.viewState = LoadingState();
       textEditingController.clear();
       isSearchClicked = false;
     });

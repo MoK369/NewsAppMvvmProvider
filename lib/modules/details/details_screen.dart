@@ -27,61 +27,67 @@ class DetailsScreen extends StatelessWidget {
         leadingWidth: 80,
       ),
       body: BgPattern(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: size.height * 0.03),
-            child: NewsCard(
-              article: article,
-              textHorizontalPadding: 10,
+          child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: size.height * 0.03),
+              child: NewsCard(
+                article: article,
+                textHorizontalPadding: 10,
+              ),
             ),
-          ),
-          Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                  color: theme.scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(25)),
-              width: size.width * 0.95,
-              height: size.height * 0.4,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Text(
-                        article.description ?? "",
-                        style: theme.textTheme.bodyMedium,
+            Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                    color: theme.scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(25)),
+                width: size.width * 0.9,
+                height: size.height * 0.4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Text(
+                          article.description ?? "",
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ),
                     ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      launchLink(context, Uri.parse(article.url!));
-                    },
-                    title: Text(
-                      textAlign: TextAlign.end,
-                      LocalesProvider.getTrans(context).viewArticle,
-                      style: theme.textTheme.labelMedium,
-                    ),
-                    trailing: Icon(
-                      Icons.play_arrow,
-                      color:
-                          themesProvider.isDark() ? Colors.white : Colors.black,
-                    ),
-                  )
-                ],
-              )),
-        ],
+                    ListTile(
+                      onTap: () {
+                        launchLink(context, Uri.parse(article.url!));
+                      },
+                      title: Text(
+                        textAlign: TextAlign.end,
+                        LocalesProvider.getTrans(context).viewArticle,
+                        style: theme.textTheme.labelMedium,
+                      ),
+                      trailing: Icon(
+                        Icons.play_arrow,
+                        color: themesProvider.isDark()
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    )
+                  ],
+                )),
+          ],
+        ),
       )),
     );
   }
 
   Future<void> launchLink(BuildContext context, Uri url) async {
+    ScaffoldMessengerState scaffoldMessenger = ScaffoldMessenger.of(context);
+    String message = LocalesProvider.getTrans(context).couldNotUrl;
     if (!await launchUrl(url)) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(LocalesProvider.getTrans(context).couldNotUrl)));
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text(message)));
     }
+    return;
   }
 }
